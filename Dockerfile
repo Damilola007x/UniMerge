@@ -4,9 +4,9 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Step 2: Run the application
-# Use eclipse-temurin instead of the old openjdk image
 FROM eclipse-temurin:17-jdk-jammy
-COPY --from=build /target/UniMerge-0.0.1-SNAPSHOT.jar app.jar
+# UPDATED LINE BELOW TO MATCH VERSION 1.0-SNAPSHOT
+COPY --from=build /target/UniMerge-1.0-SNAPSHOT.jar app.jar
 
 # Expose the Port for the Web API and JADE
 EXPOSE 8080 1099
