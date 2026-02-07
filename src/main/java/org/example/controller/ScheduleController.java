@@ -13,8 +13,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class ScheduleController {
 
-    // These are the ONLY two variables you need for policy.
-    // They must be public so VenueResponseBehavior can see them.
+    // THE SOURCE OF TRUTH: Global variables for the Agents to read
     public static String globalBlacklist = "";
     public static String globalVenue = "Unassigned Hall";
 
@@ -24,6 +23,10 @@ public class ScheduleController {
     @Autowired
     private StudentRepository studentRepo;
 
+    /**
+     * LOGIN ENDPOINT
+     * Handles both Lecturers and Students using hardcoded logic in the repositories
+     */
     @PostMapping("/login")
     public String login(@RequestBody Map<String, String> payload) {
         String role = payload.get("role");
@@ -38,15 +41,26 @@ public class ScheduleController {
         }
     }
 
+    /**
+     * LECTURER CONSTRAINTS ENDPOINT
+     * This is where the lecturer sets the specific Hall and Blacklisted days
+     */
     @PostMapping("/constraints")
     public String updateConstraints(@RequestBody Map<String, String> payload) {
-        // FIX: Update the global variables that the Agents actually use
         globalBlacklist = payload.get("prohibitedDays");
         globalVenue = payload.get("venueName");
-        System.out.println("Lecturer Policy Updated: Venue is " + globalVenue);
+
+        System.out.println("--- POLICY BROADCAST ---");
+        System.out.println("Venue Locked to: " + globalVenue);
+        System.out.println("Days Blacklisted: " + globalBlacklist);
+
         return "SUCCESS";
     }
 
+    /**
+     * STUDENT NEGOTIATION ENDPOINT
+     * Validates the student's choice against the Lecturer's policy before spawning Agents
+     */
     @PostMapping("/negotiate")
     public String negotiate(@RequestBody Map<String, String> payload) {
         String matric = payload.get("matricNumber");
@@ -54,28 +68,28 @@ public class ScheduleController {
         String day = payload.get("preferredDay");
         String requestedVenue = payload.get("preferredVenue");
 
+        // 1. Database Check (In-Memory Repository)
         Student student = studentRepo.findByMatricNumber(matric);
         if (student == null) return "ERROR: Matric number not recognized.";
 
+        // 2. Course Authorization Check
         String registeredCourse = student.getCarryOverCourse().trim();
-
-        // 1. Validation: Is it the student's actual course?
         if (!registeredCourse.equalsIgnoreCase(requestedCourse)) {
-            return "REJECTED: Unauthorized course.";
+            return "REJECTED: You are only authorized for " + registeredCourse;
         }
 
-        // 2. Validation: Is the day blocked?
+        // 3. Blacklist Check (The "Preferred Day" logic)
         if (globalBlacklist.contains(day)) {
-            return "REJECTED: Venue Agent says " + day + " is blacklisted.";
+            return "REJECTED: The Venue Agent has blacklisted " + day + " per Lecturer's request.";
         }
 
-        // 3. Validation: Did they pick the venue the lecturer chose?
+        // 4. Venue Mismatch Check (The "Strict Venue" logic)
         if (!requestedVenue.equalsIgnoreCase(globalVenue)) {
-            return "REJECTED: Access Denied. You must select the authorized venue: " + globalVenue;
+            return "REJECTED: Unauthorized Venue! You must select: " + globalVenue;
         }
 
-        // If all checks pass, we tell the frontend to trigger the JADE agents
-        // We return globalVenue to ensure the frontend displays the CORRECT venue
+        // 5. Success - Trigger JADE Handshake
+        // We return the authorized data to the frontend to start the Agent process
         return "AGENT_SPAWNED:" + requestedCourse + ":" + student.getName() + ":" + day + ":" + globalVenue;
     }
 }

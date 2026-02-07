@@ -1,31 +1,27 @@
 package org.example.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
-
-@Entity
-@Table(name = "final_schedules")
-@Data
 public class Schedule {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "course_code")
+    private String lecturerId;
+    private String lecturerLoginId;
     private String courseCode;
 
-    @Column(name = "course_title")
-    private String courseTitle;
+    // ADD THIS CONSTRUCTOR
+    public Schedule(String lecturerId, String lecturerLoginId, String courseCode) {
+        this.lecturerId = lecturerId;
+        this.lecturerLoginId = lecturerLoginId;
+        this.courseCode = courseCode;
+    }
 
-    @Column(name = "venue_id")
-    private String venueId;
+    // Default constructor (Optional, but good practice)
+    public Schedule() {}
 
-    @Column(name = "lecturer_id")
-    private String lecturerId; // The Name (e.g., Dr_Odegbesan)
+    // GETTERS
+    public String getLecturerId() { return lecturerId; }
+    public String getLecturerLoginId() { return lecturerLoginId; }
+    public String getCourseCode() { return courseCode; }
 
-    @Column(name = "lecturer_login_id", unique = true)
-    private String lecturerLoginId; // The ID (e.g., LEC001)
-
-    @Column(name = "negotiation_rounds")
-    private Integer negotiationRounds;
+    // SETTERS
+    public void setLecturerId(String lecturerId) { this.lecturerId = lecturerId; }
+    public void setLecturerLoginId(String lecturerLoginId) { this.lecturerLoginId = lecturerLoginId; }
+    public void setCourseCode(String courseCode) { this.courseCode = courseCode; }
 }

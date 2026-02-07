@@ -1,46 +1,27 @@
 package org.example.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "students_registry") // Matches your CREATE TABLE name
 public class Student {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
-
-    @Column(name = "matric_number", unique = true, nullable = false)
+    private String name;
     private String matricNumber;
-
-    @Column(name = "department", nullable = false)
-    private String department;
-
-    @Column(name = "carry_over_course", nullable = false)
     private String carryOverCourse;
 
-    @Column(name = "password")
-    private String password;
+    // REQUIRED CONSTRUCTOR: This fixes the "found: String, String, String" error
+    public Student(String name, String matricNumber, String carryOverCourse) {
+        this.name = name;
+        this.matricNumber = matricNumber;
+        this.carryOverCourse = carryOverCourse;
+    }
 
-    @Column(name = "created_at", insertable = false, updatable = false)
-    private LocalDateTime createdAt;
+    // Default constructor (Needed by some frameworks)
+    public Student() {}
 
-    // GETTERS AND SETTERS
-    public String getName() { return fullName; } // Controller uses .getName()
-    public void setName(String fullName) { this.fullName = fullName; }
-
+    // GETTERS
+    public String getName() { return name; }
     public String getMatricNumber() { return matricNumber; }
-    public void setMatricNumber(String matricNumber) { this.matricNumber = matricNumber; }
-
     public String getCarryOverCourse() { return carryOverCourse; }
+
+    // SETTERS
+    public void setName(String name) { this.name = name; }
+    public void setMatricNumber(String matricNumber) { this.matricNumber = matricNumber; }
     public void setCarryOverCourse(String carryOverCourse) { this.carryOverCourse = carryOverCourse; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public Integer getId() { return id; }
 }
